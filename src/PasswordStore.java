@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.*;
+
 /**
  * Unifies IO of passwords, working with a particular file.
  * @author ferrodr (Fernando Rodríguez Martín - UVa) */
@@ -26,12 +27,14 @@ public class PasswordStore {
 		return storeName;
 	}
 
+	/** Reads the password list from disk, and stores it internally.*/
 	public void readPasswordListFromFile() throws FileNotFoundException {
 		PasswordIO io = new PasswordIO(storepath);
 		list.clear();
 		list.addAll(io.readPasswords());
 	}
 
+	/** Writes the password list to disk. */
 	public void writePasswordList() throws IOException {
 		PasswordIO io = new PasswordIO(storepath);
 		io.writePasswords(list); //List cannot be null, so we dont handle the exception.
@@ -39,9 +42,33 @@ public class PasswordStore {
 	
 	/**
 	 * Adds a new password to the Password Store.
-	 * @throws IllegalArgumentException New password cannot be a null reference.*/
-	public void setNewPassword(Password newPassword) throws IllegalArgumentException {
-		if(newPassword == null) {throw new IllegalArgumentException("New password cannot be a null reference.");}
+	 * @param name the name of the site where the password is used 
+	 * @param password the plain password that is wanted to be stored, this 
+	 * password will be encrypted in order to store it safe.*/
+	//TODO: MUST HANDLE DIFFERENT TYPES OF EXCEPTIONS
+	public void setNewPassword(String name, String password) throws Exception {
+		PasswordCipher cipher = new PasswordCipher(storeKey);
+		byte[] encryptedPassword = cipher.encrypt(password.getBytes("UTF-8"));
+		Password newPassword = new Password(name, encryptedPassword.toString());
 		list.add(newPassword);
 	} 
+
+	/** Returns the password that matches with the input name.
+	 *  @param name the password name
+	 *  @return password the plain password
+	 *  @return null if the name doesn´t match with any of the passwords*/
+	//TODO: MUST HANDLE DIFFERENT TYPES OF EXCEPTIONS
+	public String getPasswordByName(String name) throws Exception{
+		PasswordCipher cipher = new PasswordCipher(storeKey);
+		Iterator<Password> it = list.iterator();
+		String returnString = null;
+		while(it.hasNext()) {
+			Password next = (Password)it.next();
+			if(next.getName().compareTo(name) == 0) {
+				returnString = new String(cipher.decrypt(next.getPassword().getBytes("UTF-8")), "UTF-8");
+				break;
+			}
+		}
+		return returnString;
+	}
 }
