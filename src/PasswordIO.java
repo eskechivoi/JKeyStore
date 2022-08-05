@@ -9,14 +9,27 @@ import java.util.*;
 public class PasswordIO {
 	private String datapath;
 	private File datafile;
+	private File storefile;
 
 	/**
 	 * Inizialices a PasswordIO that can read and write a password list from disk.
 	 * Data from disk is encrypted, and this class is not responsible for decryption.
 	 * @param datapath the path where the password store file is*/
-	public PasswordIO(String datapath) {
+	public PasswordIO(String datapath, String storepath) {
 		this.datapath = datapath;
 		datafile = new File(datapath);
+		storefile = new File(storepath);
+	}
+
+	/** Writes the store key, deleting all file content. 
+	 *	@param password the store key*/
+	public void writeStoreKey(byte[] password) throws IOException{
+		if (!storefile.exists()){storefile.createNewFile();}
+		FileOutputStream fileStream = new FileOutputStream(storefile);
+		fileStream.write(password.length);
+		fileStream.write(password);
+		fileStream.write("\n".getBytes());
+		fileStream.close();
 	}
 
 	/**
@@ -26,9 +39,9 @@ public class PasswordIO {
 	 * */
 	public void writePasswords(ArrayList<Password> passwords) throws IOException, IllegalArgumentException{
 		if (passwords == null) {throw new IllegalArgumentException("The argument list cannot be a null reference.");}
-		if (datafile.exists()) {datafile.delete();}
+		if (datafile.exists()) {datafile.delete();} 
 		datafile.createNewFile();
-		FileOutputStream fileStream = new FileOutputStream(datafile);
+		FileOutputStream fileStream = new FileOutputStream(datafile, true);
 		OutputStreamWriter outputStream = new OutputStreamWriter(fileStream, StandardCharsets.UTF_8);
 		Iterator<Password> it = passwords.iterator(); 
 		while(it.hasNext()) 
@@ -36,17 +49,32 @@ public class PasswordIO {
 		outputStream.close();
 	}
 
+	/** 
+	 * Read store key from disk.
+	 * @return key the store key*/
+	public byte[] readStoreKey() throws IOException {
+		FileInputStream in = new FileInputStream(storefile);
+		int numBytes = in.read();
+		byte[] key = in.readNBytes(numBytes);
+		in.close();
+		return key;
+	}
+
 	/**
 	 * Reads a password list from disk.
 	 * Data needs to be decrypted with the password store key.
 	 * @return passwordList the password list read from disk
 	 * */
-	public ArrayList<Password> readPasswords() throws FileNotFoundException{
+	public ArrayList<Password> readPasswords() throws IOException{
 		Scanner in = new Scanner(datafile);
 		ArrayList<Password> passwords = new ArrayList<Password>();
 		while(in.hasNextLine()){
 			String passphrase = in.nextLine();
-			passwords.add(new Password(passphrase));
+			try {
+				passwords.add(new Password(passphrase));
+			} catch (UnsupportedEncodingException e) {
+				passwords.add(null);
+			}
 		}
 		in.close();
 		return passwords;

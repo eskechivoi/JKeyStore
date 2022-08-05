@@ -46,6 +46,30 @@ public class PasswordCipher {
 		return salt;
 	}
 
+	/** Returns the encoded key used for cipher.
+	 *  @return key the encoded key*/
+	public byte[] getCipherKey(){
+		return key.getEncoded();
+	}
+
+	/** Sets the same key used for encryption.
+	 *  @param encoded_key the key used for encryption*/
+	public void setCipherKey(byte[] encoded_key){
+		key = new SecretKeySpec(encoded_key, "AES");
+	}
+	
+	/** Returns the IV parameters for decryption
+	 *  @return iv the IV parameters*/
+	public byte[] getIVParams(){
+		return iv;
+	}
+	
+	/** Sets the IV parameters, usually for decryption.
+	 *  @param ivparams the IV parameters*/
+	public void setIVParams(byte[] ivparams){
+		iv = ivparams; 
+	}
+
 	/** Encrypts the given password.
 	 *	@param password byte sequence that represents the password to be encrypted
 	 *	@return encryptedPassword byte sequence, that represents the encrypted password, in UTF-8*/
