@@ -7,7 +7,6 @@ import java.util.*;
  * that are independent of the particular password store.
  * @author ferrodr (Fernando Rodríguez Martín - UVa) */
 public class PasswordIO {
-	private String datapath;
 	private File datafile;
 	private File storefile;
 
@@ -16,7 +15,6 @@ public class PasswordIO {
 	 * Data from disk is encrypted, and this class is not responsible for decryption.
 	 * @param datapath the path where the password store file is*/
 	public PasswordIO(String datapath, String storepath) {
-		this.datapath = datapath;
 		datafile = new File(datapath);
 		storefile = new File(storepath);
 	}
@@ -44,8 +42,10 @@ public class PasswordIO {
 		FileOutputStream fileStream = new FileOutputStream(datafile, true);
 		OutputStreamWriter outputStream = new OutputStreamWriter(fileStream, StandardCharsets.UTF_8);
 		Iterator<Password> it = passwords.iterator(); 
-		while(it.hasNext()) 
-			outputStream.write(it.next().toString() + "\n");
+		while(it.hasNext()) {
+			Password next = it.next();
+			outputStream.write(next.getName() + "-" + next.getPassword() + "-" + next.getStringIVParams() + "\n");
+		}
 		outputStream.close();
 	}
 
@@ -66,17 +66,21 @@ public class PasswordIO {
 	 * @return passwordList the password list read from disk
 	 * */
 	public ArrayList<Password> readPasswords() throws IOException{
-		Scanner in = new Scanner(datafile);
+		InputStream is = new FileInputStream(datafile);
+		Reader isr = new InputStreamReader(is, "ISO-8859-1");
+		BufferedReader br = new BufferedReader(isr);
 		ArrayList<Password> passwords = new ArrayList<Password>();
-		while(in.hasNextLine()){
-			String passphrase = in.nextLine();
-			try {
-				passwords.add(new Password(passphrase));
-			} catch (UnsupportedEncodingException e) {
-				passwords.add(null);
-			}
-		}
-		in.close();
+		String line; 
+		while((line = br.readLine())!=null && !line.equals(""))
+			passwords.add(new Password(line));
+		isr.close();
 		return passwords;
+	}
+
+	private String getStringRepresentation(ArrayList<Character> list) {
+		StringBuilder builder = new StringBuilder(list.size());
+		for(Character ch:list)
+			builder.append(ch);
+		return builder.toString();
 	}
 }

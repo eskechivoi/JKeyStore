@@ -62,8 +62,8 @@ public class PasswordStore {
 		PasswordIO io = new PasswordIO(datapath, storepath);
 		PasswordCipher cipher = new PasswordCipher(storeKey);
 		cipher.setCipherKey(io.readStoreKey());
-		byte[] encryptedPassword = cipher.encrypt(Base64.getMimeDecoder().decode(password));
-		Password newPassword = new Password(name, Base64.getMimeEncoder().encodeToString(encryptedPassword), cipher.getIVParams());
+		byte[] encryptedPassword = cipher.encrypt(password.getBytes("ISO-8859-1"));
+		Password newPassword = new Password(name, encryptedPassword, cipher.getIVParams());
 		list.add(newPassword);
 	} 
 
@@ -80,18 +80,12 @@ public class PasswordStore {
 		String returnString = "not-found";
 		while(it.hasNext()) {
 			Password next = (Password)it.next();
-			if(next.getName().compareTo(name) == 0) {
+			if(next.getName().equals(name)) {
 				cipher.setIVParams(next.getIVParams());
-				returnString = Base64.getMimeEncoder().encodeToString(cipher.decrypt(Base64.getMimeDecoder().decode(next.getPassword())));
+				returnString = new String(cipher.decrypt(next.getPasswordBytes()));
 				break;
 			}
 		}
 		return returnString;
-	}
-
-	public void printPasswordList() {
-		Iterator<Password> it = list.iterator();
-		while(it.hasNext())
-			System.out.println(it.next());
 	}
 }
