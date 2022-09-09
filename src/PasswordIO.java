@@ -64,17 +64,22 @@ public class PasswordIO {
 	 * Reads a password list from disk.
 	 * Data needs to be decrypted with the password store key.
 	 * @return passwordList the password list read from disk
+	 * @return null if datafile doesn't exists.
 	 * */
 	public ArrayList<Password> readPasswords() throws IOException{
-		InputStream is = new FileInputStream(datafile);
-		Reader isr = new InputStreamReader(is, "ISO-8859-1");
-		BufferedReader br = new BufferedReader(isr);
-		ArrayList<Password> passwords = new ArrayList<Password>();
-		String line; 
-		while((line = br.readLine())!=null && !line.equals(""))
-			passwords.add(new Password(line));
-		isr.close();
-		return passwords;
+		if(datafile.exists()){
+			InputStream is = new FileInputStream(datafile);
+			Reader isr = new InputStreamReader(is, "ISO-8859-1");
+			BufferedReader br = new BufferedReader(isr);
+			ArrayList<Password> passwords = new ArrayList<Password>();
+			String line; 
+			while((line = br.readLine())!=null && !line.equals(""))
+				passwords.add(new Password(line));
+			isr.close();
+			return passwords;
+		} else {
+			return null;
+		}
 	}
 
 	private String getStringRepresentation(ArrayList<Character> list) {

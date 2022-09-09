@@ -1,6 +1,14 @@
 import java.io.*;
 import java.util.*;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.ShortBufferException;
+
+import java.security.*;
+import java.security.spec.*;
+
 /**
  * Unifies IO of passwords, working with a particular file.
  * @author ferrodr (Fernando Rodríguez Martín - UVa) */
@@ -30,7 +38,9 @@ public class PasswordStore {
 			PasswordIO io = new PasswordIO(datapath, storepath);
 			PasswordCipher cipher = new PasswordCipher(storeKey);
 			io.writeStoreKey(cipher.getCipherKey());
-		} catch (Exception e) {}
+		} catch (Exception e) {
+			//TODO Write exception code
+		}
 	}
 
 	/** Returns the password store name. 
@@ -43,7 +53,9 @@ public class PasswordStore {
 	public void readPasswordListFromFile() throws IOException {
 		PasswordIO io = new PasswordIO(datapath, storepath);
 		list.clear();
-		list.addAll(io.readPasswords());
+		ArrayList<Password> passwordList = io.readPasswords();
+		if(passwordList != null)
+			list.addAll(passwordList);
 	}
 
 	/** Writes the password list to disk. */
@@ -57,8 +69,7 @@ public class PasswordStore {
 	 * @param name the name of the site where the password is used 
 	 * @param password the plain password that is wanted to be stored, this 
 	 * password will be encrypted in order to store it safe.*/
-	//TODO: MUST HANDLE DIFFERENT TYPES OF EXCEPTIONS
-	public void setNewPassword(String name, String password) throws Exception {
+	public void setNewPassword(String name, String password) throws IOException, ShortBufferException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException{
 		PasswordIO io = new PasswordIO(datapath, storepath);
 		PasswordCipher cipher = new PasswordCipher(storeKey);
 		cipher.setCipherKey(io.readStoreKey());
@@ -71,8 +82,7 @@ public class PasswordStore {
 	 *  @param name the password name
 	 *  @return password the plain password
 	 *  @return null if the name doesn´t match with any of the passwords*/
-	//TODO: MUST HANDLE DIFFERENT TYPES OF EXCEPTIONS
-	public String getPasswordByName(String name) throws Exception{
+	public String getPasswordByName(String name) throws IOException, ShortBufferException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException{
 		PasswordIO io = new PasswordIO(datapath, storepath);
 		PasswordCipher cipher = new PasswordCipher(storeKey);
 		cipher.setCipherKey(io.readStoreKey());
@@ -87,5 +97,28 @@ public class PasswordStore {
 			}
 		}
 		return returnString;
+	}
+
+	/**
+	 * Removes the password whose name matches the input name from interal list.
+	 * IMPORTANT! This method does not delete the password in disk. Disk must be overwritten.
+	 * @param name the password name*/
+	public void deletePassword(String name) {
+		Iterator<Password> it = list.iterator();
+		while(it.hasNext()) {
+			Password next = (Password) it.next();
+			if(next.getName().equals(name))
+				it.remove();
+		}
+	}
+
+	/**
+	 * Prints the password list via standard output.*/
+	public void printPasswords() throws IOException, ShortBufferException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException{
+		Iterator<Password> it = list.iterator();
+		while(it.hasNext()) {
+			Password next = (Password)it.next();
+			System.out.println("Name: " + next.getName() + ". Password: " + getPasswordByName(next.getName()));
+		}
 	}
 }
