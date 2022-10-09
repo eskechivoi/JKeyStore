@@ -29,10 +29,10 @@ public class PasswordCipher {
 	public PasswordCipher (String password) {
 		//Generates an user-chosen password that can be used with PBE. (Password Based Encrypt)
 		try{
-		spec = new PBEKeySpec(password.toCharArray(), calcSalt(), PBKDFIter, AES_KEY_SIZE * 8);
-		SecretKeyFactory factory = SecretKeyFactory.getInstance(KEY_DERIVATION_ALGORITHM);
-		SecretKey tmp = factory.generateSecret(spec);
-		key = new SecretKeySpec(tmp.getEncoded(), AES_ALGO);
+			spec = new PBEKeySpec(password.toCharArray(), calcSalt(), PBKDFIter, AES_KEY_SIZE * 8);
+			SecretKeyFactory factory = SecretKeyFactory.getInstance(KEY_DERIVATION_ALGORITHM);
+			SecretKey tmp = factory.generateSecret(spec);
+			key = new SecretKeySpec(tmp.getEncoded(), AES_ALGO);
 		} catch (NoSuchAlgorithmException impossibleException) {
 			//Algorithm is statically defined, and it is known to exist.
 		} catch (InvalidKeySpecException dontknow) {
