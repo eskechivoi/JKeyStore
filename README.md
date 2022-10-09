@@ -7,10 +7,12 @@ If you want to use JKeyStore in CLI mode, just download the src code and compile
 
 `javac -g -d ./bin/ ./src/*.java`
 
+You can also run the `compiler.sh` script.
+
 ## Use - CLI Mode
 
 Now, go to your `bin` folder, and type the following line:
 
 `java StoreInterface`
 
-This will open a CLI client to use the Key Store.
+This will open a CLI client to use the Key Store. You can also run the `run.sh` script. Both scripts work for Windows and for Linux.
