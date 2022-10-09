@@ -17,7 +17,7 @@ public class StoreInterface{
 			int len = Integer.parseInt(length);
 			PasswordGenerator passGen = new PasswordGenerator();
 			String password = passGen.generatePassword(len);
-			String args[] = {name, password};
+			String args[] = {"gp", name, password};
 			writePassword(passStore, args); 
 		} catch (NumberFormatException e) {
 			System.err.println("Can't parse Integer: Input not an Integer.");
@@ -75,25 +75,48 @@ public class StoreInterface{
 		}
 	} 
 
+	private static String[] readInput(int choice){
+		String args[] = new String[2];
+		if(choice == 1) {
+			System.out.print("Type store name: ");
+			args[0] = System.console().readLine();
+			System.out.print("Type master password: ");
+			args[1] = new String(System.console().readPassword());
+		} if(choice == 2) {
+			System.out.print("Type store path: ");
+			args[0] = System.console().readLine();
+			System.out.print("Type secret path: ");
+			args[1] = new String(System.console().readLine());
+		}
+		return args;
+	}
+
 	public static void main (String args[]){
 		Scanner in = new Scanner(System.in);
 		PasswordStore passStore = null;
-		System.out.println("1.- Create a new password store.\n 2.- Use an existing password store.\n 3.- Help.");
+		System.out.println("1.- Create a new password store.\n2.- Use an existing password store.\n3.- Help.");
 		int choice = in.nextInt();
 		switch(choice){
-			case 1: passStore = generatePasswordStore(args);
+			case 1: String passArgs[] = readInput(1);
+					passStore = generatePasswordStore(passArgs);
+					if(passStore == null) {in.close();
+						return;}
 					break;
-			case 2: passStore = readPasswordStore(args);
+			case 2: passArgs = readInput(2);
+					passStore = readPasswordStore(passArgs);
+					if(passStore == null) {in.close();
+						return;}
 					break;
 			case 3: System.out.println("1.- Program arguments:\n -<store_name>: The name of the password store.\n -<store_password>: Master password, used to generate the 'something you own' secret.");
 					System.out.println("2.- Program arguments:\n -<datapath>: The path where the store is.\n -<secretpath>: Path where the 'something you own' secret is.");
-					break;
+					in.close();
+					return;
 			default: System.err.println("Bad action!");
 					 in.close();
 					 return;
 		}
 		System.out.print("Type an action, or type 'help' for more info: ");
-		String action = in.nextLine();
+		String action = System.console().readLine();
 		while(!action.equals("exit")){
 			if(action.equals("help")){
 				System.out.println("Possible actions:\n -<r>: Prints all the passwords from the store.\n -<w> <password_name> <password>: Writes a new password into the password store.\n -<d> <password_name>: Deletes the password that matches with the input name.\n -<gp> <password_name> <password_length>: Generates a new password, and writes it in the password store.\n -exit: Exits the current program.");
@@ -113,7 +136,7 @@ public class StoreInterface{
 				}
 			}
 			System.out.print("Type an action, or type 'help' for more info: ");
-			action = in.nextLine();
+			action = System.console().readLine();
 		}
 		in.close();
 	}
