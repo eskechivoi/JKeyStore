@@ -1,3 +1,3 @@
 #!/bin/bash
 cd bin
-java StoreInterface
+java cli.StoreInterface
