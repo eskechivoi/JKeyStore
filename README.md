@@ -6,6 +6,7 @@ Java key store, that use a 'something you own' secret to encrypt and decrypt the
 If you want to use JKeyStore in CLI mode, just download the src code and compile with the following line, on src's father folder:
 
 `javac -g -d bin -cp src src/password/*.java
+
 javac -g -d bin -cp src src/cli/*.java
 `
 
