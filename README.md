@@ -15,6 +15,6 @@ You can also run the `compiler.sh` script.
 
 Now, go to your `bin` folder, and type the following line:
 
-`java StoreInterface`
+`java cli.StoreInterface`
 
 This will open a CLI client to use the Key Store. You can also run the `run.sh` script. Both scripts work for Windows and for Linux.
