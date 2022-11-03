@@ -1,5 +1,5 @@
 # JKeyStore
-Java key store, that use a 'something you own' secret to encrypt and decrypt the passwords.
+Java key store, in CLI mode. Use a passphrase to protect your passwords!
 
 ## Installation - CLI Mode
 
