@@ -2,6 +2,7 @@ package password;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
 
 /**
@@ -9,8 +10,8 @@ import java.util.*;
  * that are independent of the particular password store.
  * @author ferrodr (Fernando Rodríguez Martín - UVa) */
 public class PasswordIO {
-	private File datafile;
-	private File storefile;
+	private final File datafile;
+	private final File storefile;
 
 	/**
 	 * Inizialices a PasswordIO that can read and write a password list from disk.
@@ -21,13 +22,13 @@ public class PasswordIO {
 		storefile = new File(storepath);
 	}
 
-	/** Writes the store key, deleting all file content. 
-	 *	@param password the store key*/
-	public void writeStoreKey(byte[] password) throws IOException{
+	/** Writes the salt into file.
+	 *	@param salt the salt used to generate the key.*/
+	public void writeSalt(byte[] salt) throws IOException{
 		if (!storefile.exists()){storefile.createNewFile();}
 		FileOutputStream fileStream = new FileOutputStream(storefile);
-		fileStream.write(password.length);
-		fileStream.write(password);
+		fileStream.write(salt.length);
+		fileStream.write(salt);
 		fileStream.write("\n".getBytes());
 		fileStream.close();
 	}
@@ -35,7 +36,7 @@ public class PasswordIO {
 	/**
 	 * Writes all passwords into disk.
 	 * Passwords are cipher so data in disk will be encrypted.
-	 * @param passwordList the password list to be written to disk
+	 * @param passwords the password list to be written to disk
 	 * */
 	public void writePasswords(ArrayList<Password> passwords) throws IOException, IllegalArgumentException{
 		if (passwords == null) {throw new IllegalArgumentException("The argument list cannot be a null reference.");}
@@ -43,23 +44,22 @@ public class PasswordIO {
 		datafile.createNewFile();
 		FileOutputStream fileStream = new FileOutputStream(datafile, true);
 		OutputStreamWriter outputStream = new OutputStreamWriter(fileStream, StandardCharsets.UTF_8);
-		Iterator<Password> it = passwords.iterator(); 
-		while(it.hasNext()) {
-			Password next = it.next();
+		for (Password next : passwords) {
 			outputStream.write(next.getName() + "-" + next.getPassword() + "-" + next.getStringIVParams() + "\n");
 		}
 		outputStream.close();
 	}
 
 	/** 
-	 * Read store key from disk.
-	 * @return key the store key*/
-	public byte[] readStoreKey() throws IOException {
+	 * Read salt from disk.
+	 * @return salt*/
+	public byte[] readSalt() throws IOException {
 		FileInputStream in = new FileInputStream(storefile);
 		int numBytes = in.read();
-		byte[] key = in.readNBytes(numBytes);
+		byte[] salt = new byte[numBytes];
+		in.read(salt,0,numBytes);
 		in.close();
-		return key;
+		return salt;
 	}
 
 	/**
@@ -70,10 +70,10 @@ public class PasswordIO {
 	 * */
 	public ArrayList<Password> readPasswords() throws IOException{
 		if(datafile.exists()){
-			InputStream is = new FileInputStream(datafile);
-			Reader isr = new InputStreamReader(is, "ISO-8859-1");
+			InputStream is = Files.newInputStream(datafile.toPath());
+			Reader isr = new InputStreamReader(is, StandardCharsets.ISO_8859_1);
 			BufferedReader br = new BufferedReader(isr);
-			ArrayList<Password> passwords = new ArrayList<Password>();
+			ArrayList<Password> passwords = new ArrayList<>();
 			String line; 
 			while((line = br.readLine())!=null && !line.equals(""))
 				passwords.add(new Password(line));
@@ -82,12 +82,5 @@ public class PasswordIO {
 		} else {
 			return null;
 		}
-	}
-
-	private String getStringRepresentation(ArrayList<Character> list) {
-		StringBuilder builder = new StringBuilder(list.size());
-		for(Character ch:list)
-			builder.append(ch);
-		return builder.toString();
 	}
 }

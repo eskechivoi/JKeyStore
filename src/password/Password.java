@@ -1,6 +1,5 @@
 package password;
 
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
@@ -8,9 +7,9 @@ import java.util.*;
  * which is the information that the program will store about the password in storage.
  * @author ferrodr (Fernando Rodríguez Martín - UVa) */
 public class Password {
-	private String name;
-	private byte[] password;
-	private byte[] iv;
+	private final String name;
+	private final byte[] password;
+	private final byte[] iv;
 
 	/**Creates a new Password given a name, a password and the IV Parameters for decryption.
 	 * @param name the password name, usually the web or site name where the password is used.
@@ -25,7 +24,7 @@ public class Password {
 	/**Creates a new Password given the toString() method format.
 	 * @see #toString()
 	 * @param format the String in the toString() method format.*/
-	public Password (String format) throws UnsupportedEncodingException {
+	public Password (String format) {
 		String[] passphrase = format.split("-");
 		name = passphrase[0];
 		password = Base64.getDecoder().decode(passphrase[1]);
@@ -52,7 +51,7 @@ public class Password {
 	}
 
 	/** Returns the IV Parameters
-	 *	@param iv the IV parameters*/
+	 *	@return iv the IV parameters*/
 	public byte[] getIVParams(){
 		return iv;
 	}
@@ -67,6 +66,6 @@ public class Password {
 	 * <site_name>[_]<encrypted_password>[_]<iv_parameters>
 	 * @return format the Password in the format <name>[_]<encrypted_password>[_]<iv_parameters>*/
 	public String toString() {
-		return name + "-" + password + "-" + getStringIVParams() + "\n";
+		return name + "-" + Arrays.toString(password) + "-" + getStringIVParams() + "\n";
 	}
 }
